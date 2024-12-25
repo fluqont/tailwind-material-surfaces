@@ -3,7 +3,7 @@ const postcss = require("postcss");
 const fs = require("node:fs/promises");
 
 describe("When there are colors with a defined 'on' color", () => {
-  it("Generates the correct CSS", () => {
+  it("Generates the correct CSS", async () => {
     const config = {
       content: [
         {
@@ -22,29 +22,39 @@ describe("When there are colors with a defined 'on' color", () => {
       plugins: [...tailwindMaterialSurfaces()],
     };
 
-    let componentsCSS = postcss([require("tailwindcss")(config)]).process(
-      "@tailwind components"
-    ).css;
+    let componentsCSS = await postcss([require("tailwindcss")(config)])
+      .process("@tailwind components", { from: undefined })
+      .then((result) => result.css);
 
     expect(componentsCSS.replace(/\n|\s|\t/g, "")).toBe(
       `
-      .surface-a {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity));
+      .dragged-surface-a {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-opacity:1;
-        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity));
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity))
-      }
-      .interactive-surface-a {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity));
-        --tw-bg-opacity:1;
-        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity));
-        --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity));
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1));
         --tw-bg-mix-opacity: 1;
         background-color: color-mix(
           var(--tw-bg-mix-method, in srgb),
-          rgb(0 0 255 / var(--tw-bg-mix-opacity)) calc(var(--tw-bg-mix-amount, 0) * 1%),
+          rgb(0 0 255 / var(--tw-bg-mix-opacity, 1 )) calc(var(--tw-bg-mix-amount, 0) * 1%),
+          var(--tw-bg-base)
+        );
+        --tw-bg-mix-amount: 16;
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms
+      }
+      .interactive-surface-a {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
+        --tw-bg-opacity:1;
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
+        --tw-text-opacity:1;
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1));
+        --tw-bg-mix-opacity: 1;
+        background-color: color-mix(
+          var(--tw-bg-mix-method, in srgb),
+          rgb(0 0 255 / var(--tw-bg-mix-opacity, 1)) calc(var(--tw-bg-mix-amount, 0) * 1%),
           var(--tw-bg-base)
         );
         transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
@@ -65,29 +75,19 @@ describe("When there are colors with a defined 'on' color", () => {
         background-color: rgb(0 0 0 / 0.12);
         --tw-bg-base: rgb(0 0 0 / 0.12)
       }
-      .dragged-surface-a {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity));
+      .surface-a {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-opacity:1;
-        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity));
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity));
-        --tw-bg-mix-opacity: 1;
-        background-color: color-mix(
-          var(--tw-bg-mix-method, in srgb),
-          rgb(0 0 255 / var(--tw-bg-mix-opacity)) calc(var(--tw-bg-mix-amount, 0) * 1%),
-          var(--tw-bg-base)
-        );
-        --tw-bg-mix-amount: 16;
-        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 150ms
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1))
       }
     `.replace(/\n|\s|\t/g, "")
     );
   });
 
   describe("When specifying user options", () => {
-    it("Generates the correct CSS", () => {
+    it("Generates the correct CSS", async () => {
       const config = {
         content: [
           {
@@ -124,26 +124,43 @@ describe("When there are colors with a defined 'on' color", () => {
         ],
       };
 
-      let componentsCSS = postcss([require("tailwindcss")(config)]).process(
-        "@tailwind components"
-      ).css;
+      let componentsCSS = await postcss([require("tailwindcss")(config)])
+        .process("@tailwind components", { from: undefined })
+        .then((result) => result.css);
 
       expect(componentsCSS.replace(/\n|\s|\t/g, "")).toBe(
         `
       .bg-a {
         --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity))
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1))
       }
-      .ibg-a {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity));
+      .dbg-a {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-opacity:1;
-        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity));
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity));
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1));
         --tw-bg-mix-opacity: 1;
         background-color: color-mix(
           var(--tw-bg-mix-method, in srgb),
-          rgb(0 0 255 / var(--tw-bg-mix-opacity)) calc(var(--tw-bg-mix-amount, 0) * 1%),
+          rgb(0 0 255 / var(--tw-bg-mix-opacity, 1)) calc(var(--tw-bg-mix-amount, 0) * 1%),
+          var(--tw-bg-base)
+        );
+        --tw-bg-mix-amount: 17;
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 1000ms
+      }
+      .ibg-a {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
+        --tw-bg-opacity:1;
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
+        --tw-text-opacity:1;
+        color: rgb(0 0 255 / var(--tw-text-opacity, 1));
+        --tw-bg-mix-opacity: 1;
+        background-color: color-mix(
+          var(--tw-bg-mix-method, in srgb),
+          rgb(0 0 255 / var(--tw-bg-mix-opacity, 1)) calc(var(--tw-bg-mix-amount, 0) * 1%),
           var(--tw-bg-base)
         );
         transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
@@ -163,23 +180,6 @@ describe("When there are colors with a defined 'on' color", () => {
         color: rgb(0 0 0 / 0.2);
         background-color: rgb(0 0 0 / 0.05);
         --tw-bg-base: rgb(0 0 0 / 0.05)
-      }
-      .dbg-a {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity));
-        --tw-bg-opacity:1;
-        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity));
-        --tw-text-opacity:1;
-        color: rgb(0 0 255 / var(--tw-text-opacity));
-        --tw-bg-mix-opacity: 1;
-        background-color: color-mix(
-          var(--tw-bg-mix-method, in srgb),
-          rgb(0 0 255 / var(--tw-bg-mix-opacity)) calc(var(--tw-bg-mix-amount, 0) * 1%),
-          var(--tw-bg-base)
-        );
-        --tw-bg-mix-amount: 17;
-        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 1000ms
       }
     `.replace(/\n|\s|\t/g, "")
       );
