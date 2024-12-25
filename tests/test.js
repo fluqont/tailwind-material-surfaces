@@ -214,9 +214,9 @@ describe("When there are arbitrary values in background color", () => {
     expect(utilitiesCSS.replace(/\n|\s|\t/g, "")).toContain(
       `
       .bg-\\[\\#ff0000\\]  {
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-opacity: 1;
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1))
-      }`.replace(/\n|\s|\t/g, "")
+      `.replace(/\n|\s|\t/g, "")
     );
   });
 });
