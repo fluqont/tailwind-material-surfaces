@@ -1,5 +1,6 @@
 const tailwindMaterialSurfaces = require("../src/index");
 const postcss = require("postcss");
+const fs = require("node:fs/promises");
 
 describe("When there are colors with a defined 'on' color", () => {
   it("Generates the correct CSS", () => {
@@ -183,5 +184,39 @@ describe("When there are colors with a defined 'on' color", () => {
     `.replace(/\n|\s|\t/g, "")
       );
     });
+  });
+});
+
+describe("When there are arbitrary values in background color", () => {
+  it("Generates the correct CSS", async () => {
+    const config = {
+      content: [
+        {
+          raw: "bg-[#ff0000] text-black",
+        },
+      ],
+      theme: {
+        colors: {
+          black: "#000000",
+          a: "#ff0000",
+          on: {
+            a: "#0000ff",
+          },
+        },
+      },
+      plugins: [...tailwindMaterialSurfaces()],
+    };
+
+    let utilitiesCSS = await postcss([require("tailwindcss")(config)])
+      .process("@tailwind utilities", { from: undefined })
+      .then((result) => result.css);
+
+    expect(utilitiesCSS.replace(/\n|\s|\t/g, "")).toContain(
+      `
+      .bg-\\[\\#ff0000\\]  {
+        --tw-bg-opacity: 1;
+        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1))
+      }`.replace(/\n|\s|\t/g, "")
+    );
   });
 });
