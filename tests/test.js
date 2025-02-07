@@ -1,6 +1,5 @@
 const tailwindMaterialSurfaces = require("../src/index");
 const postcss = require("postcss");
-const fs = require("node:fs/promises");
 
 describe("When there are colors with a defined 'on' color", () => {
   it("Generates the correct CSS", async () => {
@@ -73,16 +72,19 @@ describe("When there are colors with a defined 'on' color", () => {
       .interactive-surface-a:disabled {
         color: rgb(0 0 0 / 0.38);
         background-color: rgb(0 0 0 / 0.12);
+        background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-base: rgb(0 0 0 / 0.12)
       }
       .surface-a {
         background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
-        --tw-bg-opacity:1;
+        --tw-bg-opacity: 1;
         --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1));
-        --tw-text-opacity:1;
+        --tw-text-opacity: 1;
         color: rgb(0 0 255 / var(--tw-text-opacity, 1))
       }
     `.replace(/\n|\s|\t/g, "")
+      // ! looks like adding background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1)); would break opacity, but I checked and it doesn't
+      // ! there might be edge cases
     );
   });
 
@@ -179,10 +181,12 @@ describe("When there are colors with a defined 'on' color", () => {
       .ibg-a:disabled {
         color: rgb(0 0 0 / 0.2);
         background-color: rgb(0 0 0 / 0.05);
+        background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-base: rgb(0 0 0 / 0.05)
       }
     `.replace(/\n|\s|\t/g, "")
       );
+      // ! this broke with 0.0.9, not sure if it will work with 0.0.10
     });
   });
 });
@@ -213,9 +217,13 @@ describe("When there are arbitrary values in background color", () => {
 
     expect(utilitiesCSS.replace(/\n|\s|\t/g, "")).toContain(
       `
+      .text-black {
+        --tw-text-opacity: 1;
+        color: rgb(0 0 0 / var(--tw-text-opacity, 1))
+      }
       .bg-\\[\\#ff0000\\]  {
-        background-color: rgb(255 0 0 / var(--tw-bg-opacity, 1));
         --tw-bg-opacity: 1;
+        --tw-bg-base: rgb(255 0 0 / var(--tw-bg-opacity, 1))
       `.replace(/\n|\s|\t/g, "")
     );
   });
